@@ -1,6 +1,14 @@
 import Stripe from "stripe";
 
-// Use STRIPE_SECRET_KEY for production, fallback to STRIPE_TEST_SECRET for dev
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || process.env.STRIPE_TEST_SECRET);
+const stripeKey =
+  process.env.STRIPE_SECRET_KEY || process.env.STRIPE_TEST_SECRET;
+
+if (!stripeKey && process.env.NODE_ENV === "production") {
+  console.warn(
+    "⚠️ WARNING: Stripe Secret Key is missing from Environment Variables. Payment features will fail.",
+  );
+}
+
+const stripe = new Stripe(stripeKey || "sk_test_missing_key");
 
 export default stripe;
