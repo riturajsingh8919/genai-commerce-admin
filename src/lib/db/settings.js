@@ -1,4 +1,4 @@
-import { docClient, DYNAMODB_TABLE_NAME } from "../aws";
+import { docClient, SETTINGS_TABLE } from "../aws";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 const SETTINGS_PK = "SETTING#GLOBAL";
@@ -6,7 +6,7 @@ const SETTINGS_SK = "CONFIG";
 
 export async function getGlobalSettings() {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: SETTINGS_TABLE,
     Key: {
       pk: SETTINGS_PK,
       sk: SETTINGS_SK,
@@ -45,7 +45,7 @@ export async function getGlobalSettings() {
 
 export async function updateGlobalSettings(settings) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: SETTINGS_TABLE,
     Item: {
       pk: SETTINGS_PK,
       sk: SETTINGS_SK,

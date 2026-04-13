@@ -23,5 +23,10 @@ export const s3Client = new S3Client({
 });
 
 export const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || "genai";
+export const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || "nexring_products";
+export const ORDERS_TABLE = process.env.ORDERS_TABLE || "nexring_orders";
+export const USERS_TABLE = process.env.USERS_TABLE || "nexring_users";
+export const SETTINGS_TABLE = process.env.SETTINGS_TABLE || "nexring_settings";
+
 export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || "website-assets";
 export const S3_PREFIX = process.env.S3_PREFIX || "admin-uploads/";

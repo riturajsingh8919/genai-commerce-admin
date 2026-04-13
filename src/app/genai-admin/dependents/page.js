@@ -24,10 +24,9 @@ export default function DependentsPage() {
   const [dependents, setDependents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "ALL";
+  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "US";
   const [countryFilter, setCountryFilter] = useState(initialCountry);
   const [availableCountries, setAvailableCountries] = useState([
-    "ALL",
     "US",
     "IN",
   ]);
@@ -55,8 +54,7 @@ export default function DependentsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.availableCountries) {
-          const countries = ["ALL", ...data.availableCountries];
-          setAvailableCountries(countries);
+          setAvailableCountries(["US", "IN"]);
         }
       })
       .catch((err) => console.error("Fetch countries error:", err));

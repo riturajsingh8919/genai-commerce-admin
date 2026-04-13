@@ -1,4 +1,4 @@
-import { docClient, DYNAMODB_TABLE_NAME } from "../aws";
+import { docClient, PRODUCTS_TABLE } from "../aws";
 import {
   PutCommand,
   GetCommand,
@@ -26,7 +26,7 @@ export async function getAllProducts() {
   }
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     ProjectionExpression: "#pk, #sk, #title, #status, #inventory, #country, #mainImage, #colors",
     ExpressionAttributeNames: {
       "#pk": "pk",
@@ -91,7 +91,7 @@ export async function getAllProducts() {
 
 export async function getProductById(id) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${id}`,
       sk: "METADATA",
@@ -110,7 +110,7 @@ export async function getProductById(id) {
 export async function createProduct(productData) {
   const id = uuidv4();
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Item: {
       pk: `PRODUCT#${id}`,
       sk: "METADATA",
@@ -133,7 +133,7 @@ export async function createProduct(productData) {
 
 export async function updateProduct(id, productData) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Item: {
       pk: `PRODUCT#${id}`,
       sk: "METADATA",
@@ -154,7 +154,7 @@ export async function updateProduct(id, productData) {
 
 export async function deleteProduct(id) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${id}`,
       sk: "METADATA",
@@ -172,7 +172,7 @@ export async function deleteProduct(id) {
 
 export async function patchProductStatus(id, status) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${id}`,
       sk: "METADATA",
@@ -199,7 +199,7 @@ export async function patchProductStatus(id, status) {
 
 export async function getProductBySlug(slug) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     FilterExpression: "slug = :slug",
     ExpressionAttributeValues: {
       ":slug": slug,
@@ -219,7 +219,7 @@ export async function getProductBySlug(slug) {
 
 export async function getCountryPricing(productId, countryCode) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${productId}`,
       sk: `COUNTRY#${countryCode}`,
@@ -237,7 +237,7 @@ export async function getCountryPricing(productId, countryCode) {
 
 export async function getAllCountryPricing(productId) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     KeyConditionExpression: "pk = :pk AND begins_with(sk, :skPrefix)",
     ExpressionAttributeValues: {
       ":pk": `PRODUCT#${productId}`,
@@ -272,7 +272,7 @@ export async function upsertCountryPricing(
   const existing = await getCountryPricing(productId, country);
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Item: {
       pk: `PRODUCT#${productId}`,
       sk: `COUNTRY#${country}`,
@@ -315,7 +315,7 @@ export async function upsertCountryPricing(
 
 export async function deleteCountryPricing(productId, country) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${productId}`,
       sk: `COUNTRY#${country}`,
@@ -408,7 +408,7 @@ export async function upsertInventoryItem(
   countryData.updatedAt = new Date().toISOString();
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Item: countryData,
   };
 
@@ -450,7 +450,7 @@ export async function bulkUpsertInventoryItems(productId, country, items) {
   countryData.updatedAt = new Date().toISOString();
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Item: countryData,
   };
 
@@ -482,7 +482,7 @@ export async function deleteInventoryItem(productId, country, color, size) {
     countryData.updatedAt = new Date().toISOString();
 
     const params = {
-      TableName: DYNAMODB_TABLE_NAME,
+      TableName: PRODUCTS_TABLE,
       Item: countryData,
     };
 
@@ -507,7 +507,7 @@ export async function deleteInventoryForColor(productId, color) {
       
       countryData.updatedAt = new Date().toISOString();
       const params = {
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: PRODUCTS_TABLE,
         Item: countryData,
       };
       
@@ -544,7 +544,7 @@ export async function decrementStock(productId, country, color, size, qty = 1) {
   const strSize = String(size);
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: PRODUCTS_TABLE,
     Key: {
       pk: `PRODUCT#${productId}`,
       sk: `COUNTRY#${countryCode}`,

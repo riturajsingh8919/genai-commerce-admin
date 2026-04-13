@@ -32,9 +32,9 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "ALL";
+  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "US";
   const [countryFilter, setCountryFilter] = useState(initialCountry);
-  const [availableCountries, setAvailableCountries] = useState([initialCountry !== "ALL" ? initialCountry : "US"]);
+  const [availableCountries, setAvailableCountries] = useState(["US", "IN"]);
 
   // Modal States
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -66,7 +66,7 @@ export default function OrdersPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.availableCountries)
-          setAvailableCountries(data.availableCountries);
+          setAvailableCountries(["US", "IN"]);
       })
       .catch((err) => console.error("Error fetching countries:", err));
 
@@ -322,7 +322,7 @@ export default function OrdersPage() {
                 onChange={(e) => setCountryFilter(e.target.value)}
                 className={`bg-transparent focus:outline-none appearance-none cursor-pointer pr-8 w-full font-medium ${!isSuperAdmin && adminCountry ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <option value="ALL">All Regions</option>
+
                 {availableCountries.map((c) => (
                   <option key={c} value={c}>
                     {c === "US" ? "USA" : c}

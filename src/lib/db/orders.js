@@ -1,4 +1,4 @@
-import { docClient, DYNAMODB_TABLE_NAME } from "../aws";
+import { docClient, ORDERS_TABLE, USERS_TABLE } from "../aws";
 import {
   PutCommand,
   GetCommand,
@@ -80,7 +80,7 @@ export async function createOrder(orderData) {
   try {
     // Check if user already exists
     const getUserParams = {
-      TableName: DYNAMODB_TABLE_NAME,
+      TableName: USERS_TABLE,
       Key: {
         pk: `USER#${orderData.customer.email}`,
         sk: "METADATA",
@@ -93,9 +93,9 @@ export async function createOrder(orderData) {
       // Update existing user
       await docClient.send(
         new UpdateCommand({
-          TableName: DYNAMODB_TABLE_NAME,
-          Key: {
-            pk: `USER#${orderData.customer.email}`,
+          TableName: USERS_TABLE,
+      Key: {
+        pk: `USER#${orderData.customer.email}`,
             sk: "METADATA",
           },
           UpdateExpression:
@@ -144,7 +144,7 @@ export async function createOrder(orderData) {
       };
       await docClient.send(
         new PutCommand({
-          TableName: DYNAMODB_TABLE_NAME,
+          TableName: USERS_TABLE,
           Item: userItem,
         }),
       );
@@ -153,7 +153,7 @@ export async function createOrder(orderData) {
     // Save Order
     await docClient.send(
       new PutCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: ORDERS_TABLE,
         Item: orderItem,
       }),
     );
@@ -169,7 +169,7 @@ export async function createOrder(orderData) {
 
 export async function getOrderById(id) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: ORDERS_TABLE,
     Key: {
       pk: `ORDER#${id}`,
       sk: "METADATA",
@@ -232,7 +232,7 @@ export async function updateShipmentStatus(id, shipmentIndex, status, trackingNu
   }
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: ORDERS_TABLE,
     Key: {
       pk: `ORDER#${id}`,
       sk: "METADATA",
@@ -271,7 +271,7 @@ export async function deleteOrder(id) {
       // Only purge user record if no other orders exist
       if (otherOrders.length === 0) {
         const userParams = {
-          TableName: DYNAMODB_TABLE_NAME,
+          TableName: USERS_TABLE,
           Key: {
             pk: `USER#${email}`,
             sk: "METADATA",
@@ -286,7 +286,7 @@ export async function deleteOrder(id) {
 
     // 3. Delete the order metadata
     const orderParams = {
-      TableName: DYNAMODB_TABLE_NAME,
+      TableName: ORDERS_TABLE,
       Key: {
         pk: `ORDER#${id}`,
         sk: "METADATA",
@@ -311,7 +311,7 @@ export async function getAllOrders() {
   try {
     const data = await docClient.send(
       new ScanCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: ORDERS_TABLE,
         FilterExpression: "begins_with(pk, :pkPrefix)",
         ProjectionExpression: 
           "#id, #country, #currency, #total, #status, #createdAt, #customer, #items, activationCodes, shipments, shippingAddress, shippingAddresses, isGift, appliedCoupon, phone",
@@ -348,18 +348,8 @@ export async function getAllUsers() {
   try {
     const data = await docClient.send(
       new ScanCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: USERS_TABLE,
         FilterExpression: "begins_with(pk, :pkPrefix)",
-        ProjectionExpression: "pk, #email, #name, #role, #adminType, #adminCountry, #createdAt, #country, isDependant, mainPurchaserEmail",
-        ExpressionAttributeNames: {
-          "#email": "email",
-          "#name": "name",
-          "#role": "role",
-          "#adminType": "adminType",
-          "#adminCountry": "adminCountry",
-          "#createdAt": "createdAt",
-          "#country": "country",
-        },
         ExpressionAttributeValues: {
           ":pkPrefix": "USER#",
         },
@@ -379,7 +369,7 @@ export async function getAllDependents() {
     // 1. Get from DEPENDANTS partition
     const depData = await docClient.send(
       new QueryCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: USERS_TABLE,
         KeyConditionExpression: "pk = :pk",
         ExpressionAttributeValues: {
           ":pk": "DEPENDANTS",
@@ -403,7 +393,7 @@ export async function getAllDependents() {
 export async function getOrderBySubscriptionCode(code) {
   // Scan for subscription code (not efficient but workaround for no index)
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: ORDERS_TABLE,
     FilterExpression:
       "subscriptionCode = :code OR contains(subscriptionCodes, :code)",
     ExpressionAttributeValues: {
@@ -422,7 +412,7 @@ export async function getOrderBySubscriptionCode(code) {
 
 export async function getOrdersByEmail(email) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: ORDERS_TABLE,
     FilterExpression: "customer.email = :email",
     ExpressionAttributeValues: {
       ":email": email,
@@ -448,7 +438,7 @@ export async function verifyActivationCodes(codes) {
     // Scan for orders that contain these codes
     // Note: In production with many orders, an index or different schema would be better.
     const params = {
-      TableName: DYNAMODB_TABLE_NAME,
+      TableName: ORDERS_TABLE,
       FilterExpression: "begins_with(pk, :orderPrefix)",
       ExpressionAttributeValues: {
         ":orderPrefix": "ORDER#",
@@ -524,7 +514,7 @@ export async function activateSubscriptionCodes(orderId, codes, activationData) 
     // Update Order with active codes
     await docClient.send(
       new UpdateCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: ORDERS_TABLE,
         Key: {
           pk: `ORDER#${orderId}`,
           sk: "METADATA",
@@ -539,9 +529,9 @@ export async function activateSubscriptionCodes(orderId, codes, activationData) 
 
     // Update or Create User record with subscription info
     const userParams = {
-      TableName: DYNAMODB_TABLE_NAME,
-      Key: {
-        pk: `USER#${email}`,
+          TableName: USERS_TABLE,
+          Key: {
+            pk: `USER#${email}`,
         sk: "METADATA",
       },
     };
@@ -562,7 +552,7 @@ export async function activateSubscriptionCodes(orderId, codes, activationData) 
     if (existingUser) {
       await docClient.send(
         new UpdateCommand({
-          TableName: DYNAMODB_TABLE_NAME,
+          TableName: USERS_TABLE,
           Key: {
             pk: `USER#${email}`,
             sk: "METADATA",
@@ -582,7 +572,7 @@ export async function activateSubscriptionCodes(orderId, codes, activationData) 
       // Consolidated into "DEPENDANTS" partition for better DB organization
       await docClient.send(
         new PutCommand({
-          TableName: DYNAMODB_TABLE_NAME,
+          TableName: USERS_TABLE,
           Item: {
             pk: "DEPENDANTS",
             sk: `USER#${email}`,

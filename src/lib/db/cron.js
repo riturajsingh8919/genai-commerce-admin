@@ -1,4 +1,4 @@
-import { docClient, DYNAMODB_TABLE_NAME } from "../aws";
+import { docClient, SETTINGS_TABLE } from "../aws";
 import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 /**
@@ -10,7 +10,7 @@ const CRON_PK = "SYSTEM#CRON";
 
 export async function getCronState(jobName) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: SETTINGS_TABLE,
     Key: {
       pk: CRON_PK,
       sk: `JOB#${jobName.toUpperCase()}`,
@@ -28,7 +28,7 @@ export async function getCronState(jobName) {
 
 export async function updateCronState(jobName, fingerprint, extraData = {}) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: SETTINGS_TABLE,
     Item: {
       pk: CRON_PK,
       sk: `JOB#${jobName.toUpperCase()}`,

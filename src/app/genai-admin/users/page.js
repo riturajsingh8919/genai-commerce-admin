@@ -23,10 +23,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "ALL";
+  const initialCountry = (!isSuperAdmin && adminCountry) ? adminCountry : "US";
   const [countryFilter, setCountryFilter] = useState(initialCountry);
   const [availableCountries, setAvailableCountries] = useState([
-    "ALL",
     "US",
     "IN",
   ]);
@@ -54,8 +53,7 @@ export default function UsersPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.availableCountries) {
-          const countries = ["ALL", ...data.availableCountries];
-          setAvailableCountries(countries);
+          setAvailableCountries(["US", "IN"]);
         }
       })
       .catch((err) => console.error("Fetch countries error:", err));
@@ -79,10 +77,10 @@ export default function UsersPage() {
     const csvData = filteredUsers.map((user) => [
       user.name,
       user.email,
-      user.address?.replace(/,/g, " "),
-      new Date(user.joinedAt).toLocaleString(),
-      new Date(user.lastOrderAt).toLocaleString(),
-      user.totalOrders || 1,
+      user.address?.replace(/,/g, " ") || user.adminCountry || "No Location",
+      user.joinedAt ? new Date(user.joinedAt).toLocaleString() : user.createdAt ? new Date(user.createdAt).toLocaleString() : "N/A",
+      user.lastOrderAt ? new Date(user.lastOrderAt).toLocaleString() : "N/A",
+      user.totalOrders || (user.role === "admin" ? "N/A" : 1),
     ]);
 
     const csvContent = [headers, ...csvData].map((e) => e.join(",")).join("\n");
@@ -247,14 +245,16 @@ export default function UsersPage() {
                   </p>
                   <p className="text-[11px] text-[#64748b] font-light flex items-start gap-2">
                     <MapPin className="w-3.5 h-3.5 mt-0.5 text-[#0027ED]/40" />{" "}
-                    {user.address}
+                    {user.address || user.country || user.adminCountry || "No Location Provided"}
                   </p>
                 </div>
 
                 <div className="pt-6 border-t border-[#f1f5f9] flex justify-between items-center text-[10px] font-light uppercase tracking-widest text-[#64748b]">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4 text-[#0027ED]/40" />{" "}
-                    {new Date(user.joinedAt).toLocaleDateString()}
+                    {user.joinedAt || user.createdAt 
+                      ? new Date(user.joinedAt || user.createdAt).toLocaleDateString() 
+                      : "N/A"}
                   </div>
                   <div className="text-[#0027ED] bg-[#0027ED]/5 px-3 py-1 rounded-full font-light">
                     {user.totalOrders || 1} Orders

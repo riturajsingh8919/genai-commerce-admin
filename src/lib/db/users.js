@@ -1,4 +1,4 @@
-import { docClient, DYNAMODB_TABLE_NAME } from "../aws";
+import { docClient, USERS_TABLE } from "../aws";
 import {
   PutCommand,
   GetCommand,
@@ -17,7 +17,7 @@ export const USER_TYPE = {
 
 export async function getAllAdmins() {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: USERS_TABLE,
     FilterExpression: "#role = :role",
     ExpressionAttributeNames: {
       "#role": "role",
@@ -38,7 +38,7 @@ export async function getAllAdmins() {
 
 export async function getUserByEmail(email) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: USERS_TABLE,
     IndexName: "EmailIndex",
     KeyConditionExpression: "email = :email",
     ExpressionAttributeValues: {
@@ -85,7 +85,7 @@ export async function createUser({
   }
 
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: USERS_TABLE,
     Item: item,
   };
 
@@ -100,7 +100,7 @@ export async function createUser({
 
 export async function updateUser(email, userData) {
   const params = {
-    TableName: DYNAMODB_TABLE_NAME,
+    TableName: USERS_TABLE,
     Item: {
       ...userData,
       email, // Ensure email stays consistent as it's our lookup key
@@ -138,7 +138,7 @@ export async function deleteUser(pk, sk = "METADATA") {
   try {
     await docClient.send(
       new DeleteCommand({
-        TableName: DYNAMODB_TABLE_NAME,
+        TableName: USERS_TABLE,
         Key: { pk, sk },
       }),
     );

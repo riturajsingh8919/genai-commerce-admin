@@ -172,14 +172,8 @@ export default function Dashboard() {
               disabled={!isSuperAdmin && adminCountry}
               className={`appearance-none bg-white border border-[#e2e8f0] text-[#0f172a] hover:border-[#cbd5e1] px-5 py-2.5 pr-12 rounded-2xl text-sm font-medium shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0027ED]/20 focus:border-[#0027ED] transition-all min-w-[120px] ${!isSuperAdmin && adminCountry ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >
-              {/* Only show "ALL" for Super Admins */}
-              {isSuperAdmin && <option value="ALL">Global View</option>}
-              
-              {(dashboard?.availableCountries || [adminCountry || "US"]).map((c) => (
-                <option key={c} value={c}>
-                  {c === "US" ? "USA" : c}
-                </option>
-              ))}
+              <option value="US">USA</option>
+              <option value="IN">IN</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center p-1 bg-[#f1f5f9] rounded-lg group-hover:bg-[#e2e8f0] transition-colors">
               <Globe className="w-3.5 h-3.5 text-[#64748b]" />
